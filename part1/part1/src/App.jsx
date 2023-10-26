@@ -1,4 +1,4 @@
-const Hello = () => {
+const Hello = (props) => {
   return (
     <div>
       <p>Hello world</p>
@@ -7,12 +7,15 @@ const Hello = () => {
 }
 
 const App = () => {
+  const friends = [
+    'Peter',
+    'Maya',
+  ]
   return (
     <div>
       <h1>Greetings</h1>
-      <Hello />
-      <Hello />
-      <Hello />
+      <p>{friends[0]}</p>
+      <p>{friends[1]}</p>
     </div>
   )
 }
