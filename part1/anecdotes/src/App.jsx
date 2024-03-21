@@ -56,6 +56,7 @@ const App = () => {
   // chatGPT suggested using the functional form of the setVotes function to deal with the asynchronous state. 
   // I will start using this method when dealing with asynchronous states
   const voteAnecdote = () => {
+    
     setVotes(() => {
       const copyVotesArray = [...votes];
       copyVotesArray[selected] += 1;
