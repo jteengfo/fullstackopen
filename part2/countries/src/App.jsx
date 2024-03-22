@@ -39,8 +39,8 @@ function App() {
         <div> Loading...</div>
       )
     } 
-    console.log(`inside Country`);
-    console.log(countryData);
+    // console.log(`inside Country`);
+    // console.log(countryData);
     const languageValues = Object.values(languages)
     const temperature = weatherData.main.temp
     const windSpeed = weatherData.wind.speed
@@ -105,7 +105,9 @@ function App() {
   }, [filteredCountryList])
 
   useEffect(() => {
+    if (countryData) {
       getWeatherData(countryData)
+    }
   }, [countryData])
 
   // useEffect(() => {
@@ -154,10 +156,10 @@ function App() {
 
   const getWeatherData = (countryData) => {
     // GET request
-    // console.log(countryData);
+    console.log(countryData);
     const lat = countryData.latlng[0] //lat
     const long = countryData.latlng[1] //long 
-    const apiKey = "f6e7809fc321814779360ffef874627f"
+    const apiKey = import.meta.env.VITE_SOME_KEY
     axios
       .get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&exclude=minutely,hourly,daily,alerts&appid=${apiKey}&units=metric`)
       .then(response => {
