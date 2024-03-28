@@ -7,7 +7,7 @@ function App() {
 
   // components
   const Countries = ({filteredCountryList, countryData, passCountryName, weatherData}) => { 
-    // console.log(`inside countries`)
+    // console.log(`inside countries: ${weatherData}`)
     // console.log(weatherData);
     if (filteredCountryList.length > 10 && inputCountry !== '') {
       return `Too many matches, specify another filter`
@@ -31,14 +31,15 @@ function App() {
   }
 
   const Country = ({countryData, weatherData}) => {
-    const {name, capital, area, languages, flags} = countryData
+    
     // const temperature = weatherData && weatherData.main.temp ? weatherData.main.temp: null
-
-    if (!weatherData || !countryData || !name || !capital || !area || languages === null) {
+    // console.log(`weatherData in Country: ${weatherData}`)
+    if (!weatherData || !weatherData.main || !countryData) {
       return (
         <div> Loading...</div>
       )
     } 
+    const {name, capital, area, languages, flags} = countryData
     // console.log(`inside Country`);
     // console.log(countryData);
     const languageValues = Object.values(languages)
@@ -74,7 +75,7 @@ function App() {
   const [countryList, setCountryList] = useState([])
   const [filteredCountryList, setFilteredCountryList] = useState([])
   const [inputCountry, setInputCountry] = useState([])
-  const [countryData, setCountryData] = useState([])
+  const [countryData, setCountryData] = useState(null)
   const [weatherData, setWeatherData] = useState([])
 
   // useeffect to get all countries once 
@@ -94,8 +95,10 @@ function App() {
     filterCountries();
   }, [inputCountry])
 
+  // this sets CountryData -> triggers getWeatherData
   useEffect(() => {
     if (filteredCountryList.length === 1) {
+      // console.log(`okay thisisthe one: ${filteredCountryList}`);
       getCountry(filteredCountryList[0])
     }
 
@@ -106,6 +109,8 @@ function App() {
 
   useEffect(() => {
     if (countryData) {
+      console.log(countryData)
+      console.log(`whyyyy`);
       getWeatherData(countryData)
     }
   }, [countryData])
@@ -156,7 +161,7 @@ function App() {
 
   const getWeatherData = (countryData) => {
     // GET request
-    console.log(countryData);
+    // console.log(countryData);
     const lat = countryData.latlng[0] //lat
     const long = countryData.latlng[1] //long 
     const apiKey = import.meta.env.VITE_SOME_KEY
@@ -164,9 +169,12 @@ function App() {
       .get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&exclude=minutely,hourly,daily,alerts&appid=${apiKey}&units=metric`)
       .then(response => {
         setWeatherData(response.data)
-        console.log(`inside getWeatherData`);
-        console.log(response.data)
+        // console.log(`inside getWeatherData`);
+        // console.log(response.data)
       })
+      .catch(error => {
+        console.error('Error fetching weather data:', error);
+      });
   }
 
 
