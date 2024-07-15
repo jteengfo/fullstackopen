@@ -8,3 +8,17 @@ content-type: application/json
     "content": "sample",
     "important": true
 }
+###
+
+DELETE http://localhost:3001/api/notes/668ada68db90fc042b08fc93
+
+###
+
+PUT http://localhost:3001/api/notes/
+Content-Type: application/json
+
+{
+    "content": "sample_modified",
+    "important": false
+}
+
