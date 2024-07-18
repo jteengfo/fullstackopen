@@ -75,7 +75,7 @@ const App = () => {
 
   useEffect(() => {
     contactService
-      .getAll('http://localhost:3001/persons')
+      .getAll()
       .then(initialPersons => {
         setPersons(initialPersons)
       })
@@ -113,15 +113,16 @@ const App = () => {
               setNotification({message: null, color: 'green'})
             }, 3000)
           })
+            
         
     } else {
       const contactObject = {
         name: newName,
         number: newNumber,
-        id: persons.length + 1
+        // id: persons.length + 1
       }
       contactService
-        .create('http://localhost:3001/persons', contactObject)
+        .create('/api/persons', contactObject)
         .then(newContact => {
           setPersons(persons.concat(newContact))
           setNewName('')
@@ -133,7 +134,20 @@ const App = () => {
             setNotification(
               {message: null, color: 'green'})
           }, 3000)
-        })    
+        })
+        .catch(error => {
+          console.log(error.response.data.error)
+          setNotification({
+            message: `${error.response.data.error}`,
+            color: 'red'
+          })
+          setTimeout(() => {
+            setNotification({
+              message: null,
+              color: 'green'
+            })
+          }, 3000)
+        })
     }
   }
 
