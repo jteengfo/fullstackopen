@@ -2,6 +2,7 @@ const {beforeEach, after, test} = require('node:test')
 const assert = require('assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const helper = require('./test_helper')
 
 
 const app = require('../app')
@@ -9,86 +10,76 @@ const Blog = require('../models/blog')
 
 const api = supertest(app)
 
-// beforeEach (async () => {
-//     await Blog.deleteMany({})
+beforeEach (async () => {
+    await Blog.deleteMany({})
 
-//     const blogs = [
-//         {
-//             title: "Number 1",
-//             author: "James",
-//             url: "http://google.ca",
-//             likes: "2"
-//         },
+    const blogObjects = helper.initialBlogs.map(
+        blog => new Blog(blog)
+    )
 
-//         {
-//             title: "Number 2",
-//             author: "Norah",
-//             url: "http://google.com",
-//             likes: "8"
-//         }
-//     ]
+    const promiseArray = blogObjects.map(blogObject => blogObject.save())
 
-//     const blogObjects = blogs.map(
-//         blog => new Blog(blog)
-//     )
+    await Promise.all(promiseArray)
+})
 
-//     const promiseArray = blogObjects.map(blogObject => blogObject.save())
-
-//     await Promise.all(promiseArray)
-// })
-
-// test('app returns the correct amount of blog posts', async () => {
+test('app returns the correct amount of blog posts', async () => {
     
-//     const response = await api.get('/api/blogs')
+    const response = await api.get('/api/blogs')
 
-//     assert.strictEqual(response.body.length, 2)
-// })
+    assert.strictEqual(response.body.length, 2)
+})
 
 
 test('app returns the same id as the unique identifier property of the blog post named id', async () => {
 
-    const response = await api.get('/api/blogs/66b12c4104d4b1e094935d44')
-    
+    const blogsAtStart = await helper.blogsInDb()
 
-    assert.strictEqual(response.body.id, '66b12c4104d4b1e094935d44')
+    const blogToView = blogsAtStart[0]
+
+    const response = await api
+        .get(`/api/blogs/${blogToView.id}`)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+    
+    assert.strictEqual(response.body.id, blogToView.id)
 })
 
-// test('creating another blog post is a success', async () => {
-//     const blog = {
-//         title: "New note added",
-//         author: "James",
-//         url: "https://jarte.info",
-//         likes: "8"
-//     }
+test('creating another blog post is a success', async () => {
+    const blog = {
+        title: "New note added",
+        author: "James",
+        url: "https://jarte.info",
+        likes: "8"
+    }
 
-//     await api
-//         .post('/api/blogs/')
-//         .send(blog)
+    await api
+        .post('/api/blogs/')
+        .send(blog)
 
-//     const response = await api.get('/api/blogs/')
+    const response = await api.get('/api/blogs/')
 
-//     assert.strictEqual(response.body.length, 3)
+    assert.strictEqual(response.body.length, 3)
     
-// })
+})
 
-// test('if like property is missing, like defaults to 0', async () => {
+test('if like property is missing, like defaults to 0', async () => {
 
-//     // send a blog without like property
-//     const newBlog = {
-//         title: "this blog should have 0 likes",
-//         author: "James",
-//         url: "http://google.com",
-//     }
+    // send a blog without like property
+    const newBlog = {
+        title: "this blog should have 0 likes",
+        author: "James",
+        url: "http://google.com",
+    }
 
-//     const response = await api
-//         .post('/api/blogs/')
-//         .send(newBlog)
+    const response = await api
+        .post('/api/blogs/')
+        .send(newBlog)
 
-//     // validate blog sent has like property with 0 value 
+    // validate blog sent has like property with 0 value 
 
-//     assert.strictEqual(response.body.likes, 0)
+    assert.strictEqual(response.body.likes, 0)
 
-// })
+})
 
 
 test('if new blog sent missing title, return a 400', async () => {
