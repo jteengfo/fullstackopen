@@ -5,6 +5,7 @@ const config = require('./utils/config')
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
+const usersRouter = require('../bloglist/controllers/users')
 const app = express()
 
 mongoose.set('strictQuery', false)
@@ -25,6 +26,7 @@ app.use(express.json())
 app.use(middleware.requestLogger)
 
 app.use('/api/blogs', blogsRouter) // means we only use blogs Router if '/api/blogs'?
+app.use('/api/users', usersRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
