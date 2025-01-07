@@ -1,0 +1,14 @@
+GET http://localhost:3003/api/blogs/
+
+###
+
+POST http://localhost:3003/api/blogs/
+Content-Type: application/json
+
+{
+    "title" : "blog test",
+    "author" : "Jane Doe",
+    "url": "http://google.com",
+    "likes": 17,
+    "userId": "66cdda0616483cdb223379ed"
+}

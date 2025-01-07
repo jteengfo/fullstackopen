@@ -1,0 +1,12 @@
+POST http://localhost:3003/api/users/
+Content-Type: application/json
+
+{
+    "username": "jartef",
+    "name": "James T.",
+    "password": "testpassword"
+}
+
+###
+
+GET http://localhost:3003/api/users
