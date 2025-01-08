@@ -76,3 +76,77 @@ describe('total likes', () => {
         assert.strictEqual(result, 60)
     })
 })
+
+describe('favorite blog', () => {
+  test('of empty list is null', () => {
+    const result = listHelper.favoriteBlog([])
+
+    assert.strictEqual(result, null)
+  })
+
+  test('of a list with one blog is that blog', () => {
+    const listWithOneBlog = [
+      {
+        _id: '5a422aa71b54a676234d17f8',
+        title: 'Go To Statement Considered Harmful',
+        author: 'Edsger W. Dijkstra',
+        url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+        likes: 5,
+        __v: 0
+      }
+    ]
+
+    const result = listHelper.favoriteBlog(listWithOneBlog)
+
+    assert.deepStrictEqual(result, listWithOneBlog[0])
+  })
+
+  test('of a list with many blogs is the one with the most likes', () => {
+    const listWithMultipleBlogs = [
+      {
+        _id: '5a422aa71b54a676234d17f8',
+        title: 'Go To Statement Considered Harmful',
+        author: 'Edsger W. Dijkstra',
+        url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+        likes: 5,
+        __v: 0
+      },
+      {
+        _id: '5a422b3a1b54a676234d17f9',
+        title: 'Understanding the JavaScript Event Loop',
+        author: 'Philip Roberts',
+        url: 'https://2014.jsconf.eu/speakers/philip-roberts-what-the-heck-is-the-event-loop-anyway.html',
+        likes: 12,
+        __v: 0
+      },
+      {
+        _id: '5a422bc61b54a676234d17fa',
+        title: 'The Art of Computer Programming',
+        author: 'Donald Knuth',
+        url: 'https://en.wikipedia.org/wiki/The_Art_of_Computer_Programming',
+        likes: 15,
+        __v: 0
+      },
+      {
+        _id: '5a422ca71b54a676234d17fb',
+        title: 'Clean Code: A Handbook of Agile Software Craftsmanship',
+        author: 'Robert C. Martin',
+        url: 'https://en.wikipedia.org/wiki/Clean_Code',
+        likes: 8,
+        __v: 0
+      },
+      {
+        _id: '5a422d3f1b54a676234d17fc',
+        title: 'You Don’t Know JS: Scope & Closures',
+        author: 'Kyle Simpson',
+        url: 'https://github.com/getify/You-Dont-Know-JS',
+        likes: 20,
+        __v: 0
+      }
+    ]
+
+    const result = listHelper.favoriteBlog(listWithMultipleBlogs)
+
+    assert.deepStrictEqual(result, listWithMultipleBlogs[4])
+  })
+})
