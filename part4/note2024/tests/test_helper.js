@@ -19,11 +19,14 @@ const initialNotes = [
 ]
 
 const nonExistingId = async () => {
+  // create a note
   const note = new Note ({ content: 'willRemoveThisSoon' })
 
+  // save and delete it from db
   await note.save()
   await note.deleteOne()
 
+  // we get the id 
   return note._id.toString()
 }
 
