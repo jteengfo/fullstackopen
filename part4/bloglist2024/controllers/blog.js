@@ -29,6 +29,10 @@ blogsRouter.post('/', (request, response, next) => {
 
     const body = request.body
 
+    if (request.body.url === undefined || request.body.title === undefined) {
+        return response.status(400).end()
+    }
+
     const blog = new Blog({
         title: body.title,
         author: body.author,

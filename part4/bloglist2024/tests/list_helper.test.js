@@ -190,6 +190,87 @@ test('a note unique identifier is named id', async () => {
   assert.deepStrictEqual(blogs[0]._id, undefined) // verifies that in models Blog, ._id already has been transformed to id
 })
 
+test('making a post request successfully creates a new blog post', async () => {
+  // clear db 
+  await Blog.deleteMany({})
+
+  // one blog obj
+  const oneBlog = {
+    title: "The Future of Web Development with AI",
+    author: "Samantha Rivera",
+    url: "https://techinsights.com/future-web-ai",
+    likes: 87,
+  }
+
+  // make a post request; send blog to db
+  const response = await api
+    .post('/api/blogs')
+    .send(oneBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  // get blogs from db
+  const blogsInDb = await api.get('/api/blogs')
+  const blogsArray = blogsInDb.body.map(blog => blog.title)
+
+  assert.strictEqual(blogsInDb.body.length, 1)
+  assert(blogsArray.includes('The Future of Web Development with AI'))
+
+})
+
+test('a missing like property defaults to 0 likes', async () => {
+
+  // clear db
+  await Blog.deleteMany({})
+
+  // one blog obj
+  const oneBlog = {
+    title: "The Future of Web Development with AI",
+    author: "Samantha Rivera",
+    url: "https://techinsights.com/future-web-ai",
+  }
+
+  const response = await api
+    .post('/api/blogs')
+    .send(oneBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+  
+  const blogsInDb = await api.get('/api/blogs')
+  const blogsArr = blogsInDb.body.map(blog => blog.likes)
+
+  assert.strictEqual(blogsArr[0], 0)
+  
+})
+
+test('a post request with missing title or url will return a 400', async () => {
+
+  // clear db
+  await Blog.deleteMany({})
+
+  const oneBlogNoTitle = {
+    author: "Samantha Rivera",
+    url: "https://techinsights.com/future-web-ai",
+    likes: 280
+  }
+
+  const oneBlogNoUrl = {
+    title: "The Future of Web Development with AI",
+    author: "Samantha Rivera",
+    likes: 280
+  }
+
+  const result1 = await api
+    .post('/api/blogs')
+    .send(oneBlogNoTitle)
+    .expect(400)
+  
+  const result2 = await api
+    .post('/api/blogs')
+    .send(oneBlogNoUrl)
+    .expect(400)
+  
+})
 
 after(async () => {
   mongoose.connection.close()
