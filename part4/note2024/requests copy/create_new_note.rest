@@ -1,0 +1,8 @@
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1hcmlvMjciLCJpZCI6IjY2YmExNGQ1Y2ViZTliYWI5MTNlNTA1MCIsImlhdCI6MTcyMzYwOTk5OH0.yVg1FXVSZeXKOr_3u_JPgGSug9_ygqnW5eYU2YTA1K0
+
+{
+    "content": "Okay Pikachu; trying out note with authorization",
+    "important": true
+}

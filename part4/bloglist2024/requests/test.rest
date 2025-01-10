@@ -2,8 +2,12 @@ POST http://localhost:3003/api/blogs/
 Content-Type: application/json
 
 {
-    "title" : "blog test",
-    "author" : "Jane Doe",
-    "url": "http://google.com",
-    "likes": 17
+    "title" : "another blog test",
+    "author" : "James Doe",
+    "url": "http://google.ca",
+    "likes": 8
 }
+
+###
+
+GET http://localhost:3003/api/blogs/
