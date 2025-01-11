@@ -175,7 +175,7 @@ test('a get request returns all blogs in db', async () => {
   await Promise.all(promiseArray)
   
   const response = await api.get('/api/blogs/')
-  console.log(response.body)
+
 
   assert.strictEqual(response.body.length, helper.initialBlogs.length)
 })
@@ -184,7 +184,6 @@ test('a note unique identifier is named id', async () => {
   
   const blogsInDb = await api.get('/api/blogs')
   const blogs = blogsInDb.body
-  console.log('blogs')
 
   assert(blogs[0].id)                             // verifies that .id exists 
   assert.deepStrictEqual(blogs[0]._id, undefined) // verifies that in models Blog, ._id already has been transformed to id
@@ -270,6 +269,81 @@ test('a post request with missing title or url will return a 400', async () => {
     .send(oneBlogNoUrl)
     .expect(400)
   
+})
+
+test('a post is deleted when making a delete request', async () => {
+
+  await Blog.deleteMany({})
+
+  const blogToAdd = {
+    title: "The Future of Web Development with AI",
+    author: "Samantha Rivera",
+    url: "https://techinsights.com/future-web-ai",
+    likes: 87,
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(blogToAdd)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtStart = await helper.blogsInDb()
+
+  const blogToDelete = blogsAtStart[0]
+
+
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+  
+  const blogsAtEnd = await helper.blogsInDb()
+  const titles = blogsAtEnd.map(blog => blog.title)
+
+  assert.strictEqual(blogsAtStart.length - 1, blogsAtEnd.length)
+  assert(!titles.includes('The Future of Web Development with AI'))
+
+})
+
+
+test('updating the number of likes succeeds', async () => {
+  await Blog.deleteMany({})
+
+  const blogToAdd = {
+    title: "The Future of Web Development with AI",
+    author: "Samantha Rivera",
+    url: "https://techinsights.com/future-web-ai",
+    likes: 87,
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(blogToAdd)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtStart = await helper.blogsInDb()
+
+  const blogToUpdate = blogsAtStart[0]
+
+
+  const updatedBlog = {
+    title: "The Future of Web Development with AI",
+    author: "Samantha Rivera",
+    url: "https://techinsights.com/future-web-ai",
+    likes: 500,
+  }
+
+  await api
+    .put(`/api/blogs/${blogToUpdate.id}`)
+    .send(updatedBlog)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  const updatedBlogFromDb = blogsAtEnd.find(blog => blog.id === blogToUpdate.id)
+
+  assert.strictEqual(updatedBlogFromDb.likes, 500)
 })
 
 after(async () => {
