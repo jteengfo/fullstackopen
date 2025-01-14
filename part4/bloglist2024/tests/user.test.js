@@ -3,18 +3,22 @@ const assert = require('node:assert')
 const supertest = require('supertest')
 const app = require('../app')
 const User = require('../models/user')
+const Blog = require('../models/Blog')
 const helper = require('./test_helper')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const { default: mongoose } = require('mongoose')
 const api = supertest(app)
 
 describe('when there is initially one user in the db', () => {
     beforeEach( async () => {
         await User.deleteMany({})
+        await Blog.deleteMany({})
 
-        const passwordHash = await bcrypt.hash("password", 10)
+        const passwordHash = await bcrypt.hash("pokemon", 10)
         const user = new User({
-            username: "Root",
+            username: "charizard",
+            name: 'Not Charizard',
             passwordHash
         })
 
@@ -102,6 +106,78 @@ describe('when there is initially one user in the db', () => {
         assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1);
     })
 
+    test('should login successfully with valid credentials', async () => {
+        const user = {
+            username: "charizard",
+            password: "pokemon"
+        }
+
+        const response = await api
+            .post('/api/login')
+            .send(user)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        const decodedToken = jwt.verify(response.body.token, process.env.SECRET)
+
+        assert.strictEqual(decodedToken.username, user.username)
+    })
+
+    test('should fail login with invalid credentials', async () => {
+        const invalidUser = {
+            username: 'invalidUser',
+            password: 'password'
+        }
+
+        const response = await api
+            .post('/api/login')
+            .send(invalidUser)
+            .expect(401)
+            .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.error, 'invalid username or password')
+        
+    })
+
+    test('logged in user can create a blog successfully', async () => {
+        // get all blogs in db
+        const blogsAtStart = await helper.blogsInDb()
+
+        // log in to get token 
+        const user = {
+            username: 'charizard',
+            password: 'pokemon'
+        }
+
+        const response = await api
+            .post('/api/login')
+            .send(user)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        // blog object to send to db
+        const blog = {
+            title: "Understanding Token-Based Authentication",
+            author: "Jartef",
+            url: "https://example.com/token-authentication",
+            likes: 15,   
+        }
+
+        await api
+            .post('/api/blogs')
+            .send(blog)
+            .set('Authorization', `Bearer ${response.body.token}`)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const blogsAtEnd = await helper.blogsInDb()
+
+        assert.strictEqual(blogsAtStart.length + 1, blogsAtEnd.length)
+        
+        const titles = blogsAtEnd.map(blog => blog.title)
+        assert(titles.includes('Understanding Token-Based Authentication'))
+        
+    })
     after(() => {
         mongoose.connection.close()
     })
