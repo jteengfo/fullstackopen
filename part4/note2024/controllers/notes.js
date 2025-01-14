@@ -3,12 +3,24 @@
 
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 // get all notes and return them as JSON
 notesRouter.get('/', async (request, response) => {
-  const notes = await Note.find({})
+  const notes = await Note.find({}).populate('user', { username: 1, name: 1})
   response.json(notes)
 })
+
+
+// get token helper function
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '')
+  }
+  return null
+}
 
 // get a single note 
 notesRouter.get('/:id', async (request, response) => {
@@ -24,12 +36,29 @@ notesRouter.get('/:id', async (request, response) => {
 notesRouter.post('/', async (request, response, next) => {
   // create a note body from response
   const body = request.body
+
+  // token
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  if(!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid'})
+  }
+
+  // get user by id
+  const user = await User.findById(decodedToken.id)
+
+  // create new Note that includes user id 
   const note = new Note({
     content: body.content,
     important: body.important || false,
+    user: user.id
   })
   
   const savedNote = await note.save()
+
+  // concat new note created to array of notes for the user
+  user.notes = user.notes.concat(savedNote._id)
+  await user.save()
+
   response.status(201).json(savedNote)
 
 })

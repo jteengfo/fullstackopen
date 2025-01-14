@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt')
 const mongoose = require('mongoose')
 
 // initialize schema
@@ -5,29 +6,33 @@ const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        minLength: 3
     },
     name: String,
-    passwordHash: String,
-    notes: [                                    // an array of Mongo ids
+    passwordHash: {
+        type: String,
+        required: true,
+    },
+    blogs: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Note'
+            ref: 'Blog'
         }
     ]
 })
 
-// transform schema to remove .__id and .__v
+
+// transform schema 
 userSchema.set('toJSON', {
     transform: (document, returnedObject) => {
         returnedObject.id = returnedObject._id.toString()
         delete returnedObject._id
         delete returnedObject.__v
-        delete returnedObject.passwordHash  // should never be revealed
+        delete returnedObject.passwordHash
     }
 })
 
-// create model using user schema
 const User = mongoose.model('User', userSchema)
 
 module.exports = User

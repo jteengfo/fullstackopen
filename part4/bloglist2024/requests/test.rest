@@ -2,12 +2,26 @@ POST http://localhost:3003/api/blogs/
 Content-Type: application/json
 
 {
-    "title" : "another blog test",
+    "title" : "testing a note for test",
     "author" : "James Doe",
     "url": "http://google.ca",
-    "likes": 8
+    "likes": 8,
+    "userId": "6785b1809c9fe757d641e755"
 }
 
 ###
 
 GET http://localhost:3003/api/blogs/
+
+###
+GET http://localhost:3003/api/users/
+
+###
+POST http://localhost:3003/api/users/
+Content-Type: application/json
+
+{
+    "username": "charizard",
+    "name": "Not Charizard",
+    "password": "pokemon"
+}

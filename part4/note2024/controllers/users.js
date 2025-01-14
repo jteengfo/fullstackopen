@@ -3,8 +3,9 @@ const usersRouter = require('express').Router()
 const User = require('../models/user')
 
 usersRouter.get('/', async (request, response) => {
-
-  const users = await User.find({}).populate('blog')
+  const users = await User
+    .find({})
+    .populate('notes', { content: 1, important: 1})
 
   response.json(users)
 })
@@ -12,14 +13,6 @@ usersRouter.get('/', async (request, response) => {
 usersRouter.post('/', async (request, response) => {
 
   const { username, name, password } = request.body
-
-  const userFind = await User.findOne({ username })
-
-  if (userFind) {
-    return response.status(400).json({
-      error: 'username already taken. expected `username` to be unique'
-    })
-  }
 
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(password, saltRounds)
@@ -30,9 +23,10 @@ usersRouter.post('/', async (request, response) => {
     passwordHash
   })
 
+  // save user to db 
   const savedUser = await user.save()
-
   response.status(201).json(savedUser)
 })
+
 
 module.exports = usersRouter

@@ -3,12 +3,13 @@ const bcrypt = require('bcrypt')
 const loginRouter = require('express').Router()
 const User = require('../models/user')
 
+loginRouter.post('/', async(request, response) => {
+  const { username, password } = request.body 
 
-loginRouter.post('/', async (request, response) => {
-  const { username, password } = request.body
-
+  // first checks for user from the db
   const user = await User.findOne({ username })
 
+  // checks if password is correct 
   const passwordCorrect = user === null
     ? false
     : await bcrypt.compare(password, user.passwordHash)
@@ -24,17 +25,14 @@ loginRouter.post('/', async (request, response) => {
     id: user._id
   }
 
-  // 60*60 seconds = 1 hr
   const token = jwt.sign(
-    userForToken,
+    userForToken, 
     process.env.SECRET,
-    { expiresIn: 60*60 }
-  )
+    { expiresIn: 60*60})
 
   response
     .status(200)
     .send({ token, username: user.username, name: user.name })
-
 })
 
 module.exports = loginRouter
