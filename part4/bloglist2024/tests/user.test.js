@@ -140,7 +140,7 @@ describe('when there is initially one user in the db', () => {
         
     })
 
-    test('logged in user can create a blog successfully', async () => {
+    test('logged in user can create a blog successfully and is identified', async () => {
         // get all blogs in db
         const blogsAtStart = await helper.blogsInDb()
 
@@ -164,7 +164,7 @@ describe('when there is initially one user in the db', () => {
             likes: 15,   
         }
 
-        await api
+        const createResponse = await api
             .post('/api/blogs')
             .send(blog)
             .set('Authorization', `Bearer ${response.body.token}`)
@@ -177,12 +177,15 @@ describe('when there is initially one user in the db', () => {
         
         const titles = blogsAtEnd.map(blog => blog.title)
         assert(titles.includes('Understanding Token-Based Authentication'))
+
+        const username = createResponse.body.user.username
+        assert.strictEqual(user.username, username)
         
     })
 
-    test('a blog created by logged in user is deleted successfully', async () => {
+    test('a blog created by logged in user is deleted successfully and is identified', async () => {
         // get all blogs in db 
-        blogsAtStart = await helper.blogsInDb()
+        const blogsAtStart = await helper.blogsInDb()
 
         // log in to get token
         const user = {
@@ -211,18 +214,21 @@ describe('when there is initially one user in the db', () => {
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
-        await api
+        const deleteResponse = await api
             .delete(`/api/blogs/${blogResponse.body.id}`)
             .set('Authorization', `Bearer ${response.body.token}`)
-            .expect(204)
+            .expect(200)
         
         const blogsAtEnd = await helper.blogsInDb()
         assert.strictEqual(blogsAtStart.length, blogsAtEnd.length)
+
+        const username = deleteResponse.body.user.username
+        assert.strictEqual(user.username, username)
     })
 
     test('a blog created by a different user cannot be deleted', async () => {
         // get all blogs in db 
-        blogsAtStart = await helper.blogsInDb()
+        const blogsAtStart = await helper.blogsInDb()
 
         // log in to get token 
         const user1 = {
@@ -284,6 +290,41 @@ describe('when there is initially one user in the db', () => {
 
         assert.strictEqual(deleteResponse.body.error, 'you are not authorized to delete this blog')
 
+    })
+
+    test('a blog created fails if token is not provided', async () => {
+        // get all blogs in db 
+       const blogsAtStart = await helper.blogsInDb()
+
+        // log in to get token 
+        const user1 = {
+            username: 'charizard',
+            password: 'pokemon'
+        }
+
+        const response = await api
+            .post('/api/login')
+            .send(user1)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        
+        // blog object to send to db
+        const blog = {
+            title: "Understanding Token-Based Authentication",
+            author: "Jartef",
+            url: "https://example.com/token-authentication",
+            likes: 15,   
+        }
+        
+        // request without Authorization
+        await api
+            .post('/api/blogs')
+            .send(blog)
+            .expect(401)
+            .expect('Content-Type', /application\/json/)
+        
+        const blogsAtEnd = await helper.blogsInDb()
+        assert.strictEqual(blogsAtStart.length, blogsAtEnd.length)
     })
 
     after(() => {

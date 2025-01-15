@@ -51,6 +51,7 @@ blogsRouter.post('/', async (request, response) => {
     })
 
     const savedBlog = await blog.save()
+    savedBlog.user = request.user
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
     response.status(201).json(savedBlog)
@@ -75,8 +76,11 @@ blogsRouter.delete('/:id', async (request, response) => {
     if (user.blogs.length > 0 ) {
         await user.save()
         // delete the blog from db
-        await Blog.findByIdAndDelete(request.params.id)
-        response.status(204).end()
+        const deletedBlog = await Blog.findByIdAndDelete(request.params.id)
+        // sending 200 instead because need to send back to client user details
+        response.status(200).json({
+            user: request.user
+        })
     } else {
         response.status(403).json({
             error: 'you are not authorized to delete this blog'
