@@ -24,9 +24,14 @@ mongoose.connect(config.MONGODB_URI)
 app.use(cors())
 app.use(express.json())
 
+// middleware to be used before Routes
+app.use(middleware.tokenExtractor)
+
 app.use('/api/blogs', require('./controllers/blog'))
 app.use('/api/users', require('./controllers/user'))
 app.use('/api/login', require('./controllers/login'))
+
+
 
 
 

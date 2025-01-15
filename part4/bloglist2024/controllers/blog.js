@@ -3,14 +3,6 @@ const Blog = require('../models/Blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
-// helper function to get token from Bearer token if exists otherwise null
-const getTokenFrom = request => {
-    const authorization = request.get('authorization')
-    if (authorization && authorization.startsWith('Bearer ')) {
-        return authorization.replace('Bearer ', '')
-    }
-    return null
-}
 
 blogsRouter.get('', async (request, response) => {
     const blogs = await Blog.find({}).populate('user', { username: 1, name: 1})
@@ -34,7 +26,8 @@ blogsRouter.post('/', async (request, response) => {
     const body = request.body
     
     // decode the token to get id
-    const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+    // request.token from tokenExtractor middleware
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
     
     if (!decodedToken.id) {
         return response.status(401).json({
@@ -46,10 +39,8 @@ blogsRouter.post('/', async (request, response) => {
         return response.status(400).end()
     }
 
-
     // means token is valid; get user
     const user = await User.findById(decodedToken.id)
-
 
     const blog = new Blog({
         title: body.title,
@@ -67,8 +58,31 @@ blogsRouter.post('/', async (request, response) => {
 
 
 blogsRouter.delete('/:id', async (request, response) => {
-    await Blog.findByIdAndDelete(request.params.id)
-    response.status(204).end()
+
+    // decode token to get id 
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+
+    if(!decodedToken.id) {
+        return response.status(403).json({
+            error: 'user not found'
+        })
+    }
+
+    // valid id; find user from db
+    const user = await User.findById(decodedToken.id)
+    user.blogs = user.blogs.filter(blog => blog.id !== request.params.id)
+
+    if (user.blogs.length > 0 ) {
+        await user.save()
+        // delete the blog from db
+        await Blog.findByIdAndDelete(request.params.id)
+        response.status(204).end()
+    } else {
+        response.status(403).json({
+            error: 'you are not authorized to delete this blog'
+        })
+    }
+
 })
 
 blogsRouter.put('/:id', async (request, response) => {

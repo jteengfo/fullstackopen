@@ -8,6 +8,7 @@ const helper = require('./test_helper')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { default: mongoose } = require('mongoose')
+const { request } = require('node:http')
 const api = supertest(app)
 
 describe('when there is initially one user in the db', () => {
@@ -178,6 +179,113 @@ describe('when there is initially one user in the db', () => {
         assert(titles.includes('Understanding Token-Based Authentication'))
         
     })
+
+    test('a blog created by logged in user is deleted successfully', async () => {
+        // get all blogs in db 
+        blogsAtStart = await helper.blogsInDb()
+
+        // log in to get token
+        const user = {
+            username: 'charizard',
+            password: 'pokemon'
+        }
+
+        const response = await api
+            .post('/api/login')
+            .send(user)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        
+        // blog object to send to db
+        const blog = {
+            title: "Understanding Token-Based Authentication",
+            author: "Jartef",
+            url: "https://example.com/token-authentication",
+            likes: 15,   
+        }
+        
+        const blogResponse = await api
+            .post('/api/blogs')
+            .send(blog)
+            .set('Authorization', `Bearer ${response.body.token}`)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        await api
+            .delete(`/api/blogs/${blogResponse.body.id}`)
+            .set('Authorization', `Bearer ${response.body.token}`)
+            .expect(204)
+        
+        const blogsAtEnd = await helper.blogsInDb()
+        assert.strictEqual(blogsAtStart.length, blogsAtEnd.length)
+    })
+
+    test('a blog created by a different user cannot be deleted', async () => {
+        // get all blogs in db 
+        blogsAtStart = await helper.blogsInDb()
+
+        // log in to get token 
+        const user1 = {
+            username: 'charizard',
+            password: 'pokemon'
+        }
+
+        const response = await api
+            .post('/api/login')
+            .send(user1)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        
+        // blog object to send to db
+        const blog = {
+            title: "Understanding Token-Based Authentication",
+            author: "Jartef",
+            url: "https://example.com/token-authentication",
+            likes: 15,   
+        }
+        
+        const blogResponse = await api
+            .post('/api/blogs')
+            .send(blog)
+            .set('Authorization', `Bearer ${response.body.token}`)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        // create new User
+        const newUser = {
+            username: "spongebob",
+            name: "Spongebob Squarepants",
+            password: "squidward"
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        // log in to get token
+        const user2 = {
+            username: "spongebob",
+            password: 'squidward'
+        }
+
+        const response2 = await api
+            .post('/api/login')
+            .send(user2)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        // attempt to delete blog created by a different user
+        const deleteResponse = await api
+            .delete(`/api/blogs/${blogResponse.body.id}`)
+            .set('Authorization', `Bearer ${response2.body.token}`)
+            .expect(403)
+
+        assert.strictEqual(deleteResponse.body.error, 'you are not authorized to delete this blog')
+
+    })
+
     after(() => {
         mongoose.connection.close()
     })
