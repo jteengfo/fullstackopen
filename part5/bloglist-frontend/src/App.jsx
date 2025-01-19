@@ -14,21 +14,27 @@ const App = () => {
     if (user) {
       blogService.getAll().then(blogs =>
         setBlogs( blogs )
-      )
-      console.log('blogs are: ', blogs)  
+      ) 
     }
   }, [user])
 
-  useEffect(() => {
-    console.log('Updated blogs:', blogs)
-  }, [blogs])
 
-  // useEffect(() => {
-  //   const loggedUserJSON = window.localStorage.getItem('loggedBlog')
-  // })
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogUserApp')
+    // if it exists
+    if (loggedUserJSON) {
+      // get user from json to js obj
+      const user = JSON.parse(loggedUserJSON)
+      // set user to state var
+      setUser(user)
+      // set token from user
+      blogService.setToken(user.token)
+      
+    }
+  }, [])
 
   // helper functions 
-  const loginForm = (event) => (
+  const loginForm = () => (
     <form>
       <div>
         Username
@@ -52,6 +58,12 @@ const App = () => {
     </form>
   )
 
+  const errorView = () => (
+    <div>
+      <p>{errorMessage}</p>
+    </div>
+  )
+
 
   // event handlers
 
@@ -64,10 +76,10 @@ const App = () => {
         username, password
       })
 
-      // // save user to local storage
-      // windows.localStorage.setItem(
-      //   'loggedBlogUserApp', JSON.stringify(user)
-      // )
+      // save user to local storage
+      window.localStorage.setItem(
+        'loggedBlogUserApp', JSON.stringify(user)
+      )
 
       blogService.setToken(user.token)
       setUser(user)
@@ -77,20 +89,26 @@ const App = () => {
       setErrorMessage('Error: Wrong Credentials')
       setTimeout(() => {
         setErrorMessage(null)
-      }, 5000)
+      }, 3000)
     }
     
   }
 
+  const handleLogout = async (event) => {
+    window.localStorage.clear()
+    window.location.reload()
+  }
+
   return (
     <div>
-    
+      {errorMessage !== null && errorView()}
       {
         user === null
           ? loginForm()
           : <div>
               <h2>blogs</h2>
               <p>{user.name} logged in</p>
+              <button onClick={handleLogout}> Logout </button>
               {blogs.map(blog => (
                 <Blog key={blog.id} blog={blog}/>
               ))}
