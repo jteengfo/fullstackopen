@@ -3,12 +3,30 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+
+// style
+const OKStyle = {
+  color: 'green',
+  fontStyle: 'italic',
+  fontSize: 16,
+}
+
+const errorStyle = {
+  color: 'red',
+  fontStyle: 'italic',
+  fontSize: 16
+}
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [blogMessage, setBlogMessage] = useState(null)
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
   useEffect(() => {
     if (user) {
@@ -16,7 +34,7 @@ const App = () => {
         setBlogs( blogs )
       ) 
     }
-  }, [user])
+  }, [user]) 
 
 
   useEffect(() => {
@@ -29,15 +47,15 @@ const App = () => {
       setUser(user)
       // set token from user
       blogService.setToken(user.token)
-      
     }
   }, [])
 
   // helper functions 
   const loginForm = () => (
     <form>
+      <h2>Log in to application</h2>
       <div>
-        Username
+        Username<span> </span>
         <input
           type='text'
           value={username}
@@ -46,7 +64,7 @@ const App = () => {
         />
       </div>
       <div>
-        Password
+        Password <span> </span>
         <input
           type='password'
           value={password}
@@ -58,9 +76,63 @@ const App = () => {
     </form>
   )
 
+  const blogForm = () => (
+    <form>
+      <div>
+        Title: 
+          <input
+            type='text'
+            value={title}
+            name='Title'
+            onChange={({ target }) => setTitle(target.value)}
+          />
+      </div>
+      <div>
+        Author:
+          <input
+            type='text'
+            value={author}
+            name='Author'
+            onChange={({ target }) => setAuthor(target.value)}
+          />
+      </div>
+      <div>
+        URL:
+          <input
+            type='text'
+            value={url}
+            name='URL'
+            onChange={({ target }) => setUrl(target.value)}
+          />
+      </div>
+      <button onClick={handleBlogCreate}>Create</button>
+    </form>
+  )
+
   const errorView = () => (
-    <div>
+    <div style={errorStyle}>
       <p>{errorMessage}</p>
+    </div>
+  )
+
+  const blogAddView = () => (
+    <div style={OKStyle}>
+      <p>{blogMessage}</p>
+    </div>
+  )
+
+  const blogView = () => (
+    <div>
+      <h2>blogs</h2>
+      <span>{user.name} logged in </span>
+      <button onClick={handleLogout}> Logout </button>
+      <br></br>
+      <h2>create new</h2>
+      {blogForm()}
+      <br></br>
+      {blogs.map(blog => (
+        <Blog key={blog.id} blog={blog}/>
+      ))}
     </div>
   )
 
@@ -95,24 +167,56 @@ const App = () => {
   }
 
   const handleLogout = async (event) => {
-    window.localStorage.clear()
-    window.location.reload()
+    event.preventDefault()
+    try {
+      window.localStorage.clear()
+      window.location.reload()
+    } catch (exception) {
+      console.log(exception)
+    }
+  }
+
+  const handleBlogCreate = async (event) => {
+    event.preventDefault()
+    try {
+
+      // send blog obj to db
+      await blogService.create({
+        title: title,
+        author: author,
+        url: url
+      })
+
+      // get updated blog list 
+      const updatedBlogList = await blogService.getAll()
+      setBlogs(updatedBlogList)
+      setBlogMessage(`A new blog: ${title} by ${author} successfully created`)
+      setTimeout(() => {
+        setBlogMessage(null)
+      }, 5000)
+
+      // reset fields
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+
+    } catch (exception) {
+      setErrorMessage('Error Creating Blog')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 3000)
+    }
+
   }
 
   return (
     <div>
       {errorMessage !== null && errorView()}
+      {blogMessage !== null && blogAddView()}
       {
         user === null
           ? loginForm()
-          : <div>
-              <h2>blogs</h2>
-              <p>{user.name} logged in</p>
-              <button onClick={handleLogout}> Logout </button>
-              {blogs.map(blog => (
-                <Blog key={blog.id} blog={blog}/>
-              ))}
-            </div>
+          : blogView()
       }
 
     </div>
