@@ -3,6 +3,9 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+import BlogForm from './components/BlogForm'
+import Togglable from './components/Togglable'
+
 
 // style
 const OKStyle = {
@@ -77,36 +80,31 @@ const App = () => {
   )
 
   const blogForm = () => (
-    <form>
-      <div>
-        Title: 
-          <input
-            type='text'
-            value={title}
-            name='Title'
-            onChange={({ target }) => setTitle(target.value)}
-          />
-      </div>
-      <div>
-        Author:
-          <input
-            type='text'
-            value={author}
-            name='Author'
-            onChange={({ target }) => setAuthor(target.value)}
-          />
-      </div>
-      <div>
-        URL:
-          <input
-            type='text'
-            value={url}
-            name='URL'
-            onChange={({ target }) => setUrl(target.value)}
-          />
-      </div>
-      <button onClick={handleBlogCreate}>Create</button>
-    </form>
+    <div>
+      <h2>blogs</h2>
+      <span>{user.name} logged in </span>
+      <button onClick={handleLogout}> Logout </button>
+      <br></br>
+      <br></br>
+      <Togglable buttonLabel='New Blog'>
+        <h2>create new blog</h2>
+        <BlogForm
+          title={title}
+          author={author}
+          url={url}
+          handleSubmit={handleBlogCreate}
+          handleTitleChange={({ target }) => setTitle(target.value)}
+          handleAuthorChange={({ target }) => setAuthor(target.value)}
+          handleURLChange={({ target }) => setUrl(target.value)}
+        />
+      </Togglable>
+      
+      <br></br>
+      {blogs.map(blog => (
+        <Blog key={blog.id} blog={blog}/>
+      ))}
+    </div>
+    
   )
 
   const errorView = () => (
@@ -118,21 +116,6 @@ const App = () => {
   const blogAddView = () => (
     <div style={OKStyle}>
       <p>{blogMessage}</p>
-    </div>
-  )
-
-  const blogView = () => (
-    <div>
-      <h2>blogs</h2>
-      <span>{user.name} logged in </span>
-      <button onClick={handleLogout}> Logout </button>
-      <br></br>
-      <h2>create new</h2>
-      {blogForm()}
-      <br></br>
-      {blogs.map(blog => (
-        <Blog key={blog.id} blog={blog}/>
-      ))}
     </div>
   )
 
@@ -216,7 +199,7 @@ const App = () => {
       {
         user === null
           ? loginForm()
-          : blogView()
+          : blogForm()
       }
 
     </div>
