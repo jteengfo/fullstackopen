@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState } from 'react'
 
 const Blog = ({ blog, handleLike, handleDelete }) => {
   // state variables
@@ -15,14 +15,14 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
 
   const hideWhenVisible = { display: visible ? '' : 'none' }
 
-  // event handler 
+  // event handler
   const toggleVisibility = () => {
     setVisible(!visible)
   }
 
   return (
     <div style={blogStyle}>
-      {blog.title} <span> </span> 
+      {blog.title} <span> </span>
       <button onClick={toggleVisibility}>view</button>
       <div style={hideWhenVisible}>
         {blog.url}
@@ -34,7 +34,7 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
         <br></br>
         <button onClick={() => handleDelete(blog.id)}>Delete</button>
       </div>
-    </div>  
+    </div>
   )
 }
 

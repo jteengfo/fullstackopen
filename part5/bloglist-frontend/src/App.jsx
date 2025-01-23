@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -27,6 +27,7 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [blogMessage, setBlogMessage] = useState(null)
+  const [likeTrigger, setLikeTrigger] = useState(false)
 
   // event handlers
 
@@ -54,7 +55,7 @@ const App = () => {
         setErrorMessage(null)
       }, 3000)
     }
-    
+
   }
 
   const handleLogout = async (event) => {
@@ -72,7 +73,7 @@ const App = () => {
       // send blog obj to db
       await blogService.create(blogObject)
 
-      // get updated blog list 
+      // get updated blog list
       let updatedBlogList = await blogService.getAll()
       setBlogs(updatedBlogList)
       setBlogMessage(`A new blog: ${blogObject.title} by ${blogObject.author} successfully created`)
@@ -105,7 +106,7 @@ const App = () => {
 
   const handleLikeButton = async (id) => {
     try {
-      // get blog obj from blogs using id 
+      // get blog obj from blogs using id
       const blogToUpdate = blogs.find(blog => blog.id === id)
 
       // construct updated blog obj
@@ -117,15 +118,17 @@ const App = () => {
       // send updated blog obj to db
       await blogService.update(id, updatedBlog)
 
-      // update current blogs 
+      // update current blogs
       let updatedBlogList = await blogService.getAll()
       setBlogs(updatedBlogList)
+
+      setLikeTrigger(!likeTrigger)
     } catch (exception) {
-        console.log('Error: ', exception)
+      console.log('Error: ', exception)
     }
   }
 
-  // helper functions 
+  // helper functions
   const loginForm = () => (
     <form>
       <h2>Log in to application</h2>
@@ -135,7 +138,7 @@ const App = () => {
           type='text'
           value={username}
           name='Username'
-          onChange={({target}) => setUsername(target.value)}
+          onChange={({ target }) => setUsername(target.value)}
         />
       </div>
       <div>
@@ -167,7 +170,7 @@ const App = () => {
         <Blog key={blog.id} blog={blog} handleLike={handleLikeButton} handleDelete={handleBlogDelete}/>
       ))}
     </div>
-    
+
   )
 
   const errorView = () => (
@@ -182,16 +185,16 @@ const App = () => {
     </div>
   )
 
-  // useEffects 
+  // useEffects
 
   useEffect(() => {
     if (user) {
       blogService.getAll().then(blogs => {
         blogs.sort((a,b) => a.likes - b.likes)
         setBlogs( blogs )
-      }) 
+      })
     }
-  }, [user, handleLikeButton]) 
+  }, [user, likeTrigger])
 
 
   useEffect(() => {
