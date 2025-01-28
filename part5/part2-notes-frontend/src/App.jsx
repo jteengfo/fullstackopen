@@ -46,7 +46,7 @@ const App = () => {
 
 
   useEffect(() => {
-    // get user in JSON format 
+    // get user in JSON format
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
 
     // if exists, parse back JS obj, set user and send token to noteService
@@ -62,11 +62,11 @@ const App = () => {
     noteService
       .create(noteObject)
       .then(returnedNote => {
-          setNotes(notes.concat(returnedNote))
-          setNewNote('')
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
       })
   }
-  // helper functions 
+  // helper functions
   /**
    * arrow functions with parenthesis (not curly braces)
    * invokes an implicit return otherwise when using curly braces
@@ -78,7 +78,7 @@ const App = () => {
   const loginForm = () => {
     // inline styling rule adjusting display property
     const hideWhenVisible = { display: loginVisible ? 'none' : '' }
-    const showWhenVisible = { display: loginVisible ? '' : 'none'}
+    const showWhenVisible = { display: loginVisible ? '' : 'none' }
 
     return (
       <div>
@@ -110,7 +110,7 @@ const App = () => {
   // event handlers
   const handleLogin = async (event) => {
     event.preventDefault()
-    
+
     try {
       const user = await loginService.login({
         username, password
@@ -146,7 +146,7 @@ const App = () => {
 
   const toggleImportanceOf = (id) => {
     const note = notes.find(n => n.id === id)
-    const changedNote = {...note, important: !note.important}
+    const changedNote = { ...note, important: !note.important }
 
     noteService
       .update(id, changedNote)
@@ -156,7 +156,7 @@ const App = () => {
       .catch(error => {
         setErrorMessage(
           `Note ${note.content} was already removed from the server`
-          )
+        )
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
@@ -173,28 +173,28 @@ const App = () => {
       <h1>Notes</h1>
 
       <Notification message={errorMessage}/>
-      
+
       {
         user === null
           ? loginForm()
           : <div>
-              <p>{user.name} logged-in </p>
-              {noteForm()}
-              <button onClick={handleLogout}> Logout </button>
-            </div>
+            <p>{user.name} logged-in </p>
+            {noteForm()}
+            <button onClick={handleLogout}> Logout </button>
+          </div>
       }
 
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? 'important' : 'all' }
         </button>
-      </div>      
+      </div>
       <ul>
-        {notesToShow.map(note => 
-          <Note 
-            key={note.id} 
-            note={note} 
-            toggleImportance={()=> toggleImportanceOf(note.id)} />
+        {notesToShow.map(note =>
+          <Note
+            key={note.id}
+            note={note}
+            toggleImportance={() => toggleImportanceOf(note.id)} />
         )}
       </ul>
       <Footer/>
