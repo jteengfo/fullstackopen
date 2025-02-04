@@ -42,3 +42,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNoY
 GET http://localhost:3003/api/blogs
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImNoYXJpemFyZCIsImlkIjoiNjc4ODE5ODA3Mjc0ZmE4NjE1ZTMxMDU1IiwiaWF0IjoxNzM3MzI0MTQxfQ.CaBYy6FjkK-OblCysprAmQcPoaS6aUlfXMWw0-8JG8g
+
+###
+POST http://localhost:3003/api/testing/reset
