@@ -81,6 +81,24 @@ test.describe('Blog app', () => {
       await page.getByRole('button', { name: 'like' }).click()
       await expect(page.getByText('likes 1')).toBeVisible()
     })
+
+    test('a blog created can be deleted', async ({ page }) => {
+      await page.getByRole('button', { name: 'new blog' }).click()
+
+      await page.getByTestId('blog-title').fill('to be deleted')
+      await page.getByTestId('blog-author').fill('James TEF')
+      await page.getByTestId('blog-url').fill('http://example.com')
+
+      await page.getByRole('button', { name: 'create' }).click()
+
+
+      await page.getByRole('button', { name: 'view' }).click()
+
+      await page.getByRole('button', { name: 'delete' }).click()
+
+      await expect(page.getByText('to be deleted', { exact: true })).not.toBeVisible()
+
+    })
   })
 
 })
