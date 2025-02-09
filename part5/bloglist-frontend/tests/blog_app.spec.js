@@ -16,6 +16,15 @@ test.describe('Blog app', () => {
         password: 'salainen',
       }
     })
+
+    // create another user for the backend
+    await request.post('/api/users', {
+      data: {
+        name: 'Chet Geppiti',
+        username: 'chtgpt',
+        password: 'deepseek'
+      }
+    })
   })
 
   test('login form is displayed by default', async ({ page }) => {
@@ -98,6 +107,27 @@ test.describe('Blog app', () => {
 
       await expect(page.getByText('to be deleted', { exact: true })).not.toBeVisible()
 
+    })
+
+    test('only user created blog can see the delete button', async ({ page }) => {
+      // create new blog
+      await page.getByRole('button', { name: 'new blog' }).click()
+      await page.getByTestId('blog-title').fill('to be deleted')
+      await page.getByTestId('blog-author').fill('James TEF')
+      await page.getByTestId('blog-url').fill('http://example.com')
+      await page.getByRole('button', { name: 'create' }).click()
+
+      // logout current user
+      await page.getByRole('button', { name: 'logout' }).click()
+
+      // login as diff user
+      await page.getByTestId('username').fill('chtgpt')
+      await page.getByTestId('password').fill('deepseek')
+      await page.getByRole('button', { name: 'Login' }).click()
+
+      // click view and delete button dne
+      await page.getByRole('button', { name: 'view' }).click()
+      expect(page.getByRole('button', { name: 'delete' })).not.toBeVisible()
     })
   })
 
