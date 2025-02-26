@@ -129,6 +129,74 @@ test.describe('Blog app', () => {
       await page.getByRole('button', { name: 'view' }).click()
       expect(page.getByRole('button', { name: 'delete' })).not.toBeVisible()
     })
+    test.describe('several blogs exist', () => {
+
+      test.beforeEach( async ({ page }) => {
+        // create first blog
+        await page.getByRole('button', { name: 'new blog' }).click()
+        await page.getByTestId('blog-title').fill('first blog')
+        await page.getByTestId('blog-author').fill('James TEF')
+        await page.getByTestId('blog-url').fill('http://example.com')
+        await page.getByRole('button', { name: 'Create' }).click()
+
+        await page.getByText('first blog', { exact: true }).waitFor()
+
+
+        // create second blog
+        await page.getByTestId('blog-title').fill('second blog')
+        await page.getByTestId('blog-author').fill('James TEF')
+        await page.getByTestId('blog-url').fill('http://example.com')
+        await page.getByRole('button', { name: 'Create' }).click()
+
+        await page.getByText('second blog', { exact: true }).waitFor()
+
+      })
+
+      test('blogs are arranged in the order according to likes', async ({ page }) => {
+        test.setTimeout(30000)
+        // // first blog
+        const firstBlogContainer = page.getByText('first blog James TEF')
+
+        await firstBlogContainer.getByRole('button', { name: 'view' }).click()
+
+        await firstBlogContainer.getByRole('button', { name: 'like' }).click()
+
+        await expect(firstBlogContainer.getByText('likes 1')).toBeVisible()
+
+        await firstBlogContainer.getByRole('button', { name: 'like' }).click()
+
+        await expect(firstBlogContainer.getByText('likes 2')).toBeVisible()
+
+        // click view second blog
+
+        const secondBlogContainer = page.getByText('second blog James TEF')
+
+        await secondBlogContainer.getByRole('button', { name: 'view' }).click()
+
+        await secondBlogContainer.getByRole('button', { name: 'like' }).click()
+
+        await expect(secondBlogContainer.getByText('likes 1')).toBeVisible()
+
+        await secondBlogContainer.getByRole('button', { name: 'like' }).click()
+
+        await expect(secondBlogContainer.getByText('likes 2')).toBeVisible()
+
+        await secondBlogContainer.getByRole('button', { name: 'like' }).click()
+
+        await expect(secondBlogContainer.getByText('likes 3')).toBeVisible()
+
+        await page.waitForTimeout(1000)
+
+        const blogs = await page.locator('.blog').all()
+
+        const firstBlogText = await blogs[0].textContent()
+        expect(firstBlogText).toContain('second blog')
+
+        const secondBlogText = await blogs[1].textContent()
+        expect(secondBlogText).toContain('first blog')
+
+      })
+    })
   })
 
 })
