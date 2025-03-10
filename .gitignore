@@ -2,3 +2,5 @@ node_modules
 part5-original
 part4/note/.env
 *.env
+part6/redux-notes
+part6/counter
