@@ -14,10 +14,10 @@ Make sure that the anecdotes are ordered by the number of votes.
 - [x] 6.6: Anecdotes, step 4
 If you haven't done so already, separate the creation of action-objects to action creator-functions and place them in the src/reducers/anecdoteReducer.js file, so do what we have been doing since the chapter action creators.
 
-- [ ] 6.7: Anecdotes, step 5
+- [x] 6.7: Anecdotes, step 5
 Separate the creation of new anecdotes into a component called AnecdoteForm. Move all logic for creating a new anecdote into this new component.
 
-- [ ] 6.8: Anecdotes, step 6
+- [x] 6.8: Anecdotes, step 6
 Separate the rendering of the anecdote list into a component called AnecdoteList. Move all logic related to voting for an anecdote to this new component.
 
     Now the App component should look like this:
