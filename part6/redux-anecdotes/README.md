@@ -1,4 +1,5 @@
-# Exercises 6.3 - 6.8
+# Flux architecture and Redux
+## Exercises 6.3 - 6.8
 
 - [x] 6.3: Anecdotes, step 1
 Implement the functionality for voting anecdotes. The number of votes must be saved to a Redux store.
@@ -39,6 +40,11 @@ Separate the rendering of the anecdote list into a component called AnecdoteList
     export default App
     ```
 
+# Many reducers
 
+## Exercise 6.9
+
+- [x] 6.9 Better Anecdotes, step 7
+Implement filtering for the anecdotes that are displayed to the user.
 
 
